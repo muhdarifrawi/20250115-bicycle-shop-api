@@ -52,6 +52,7 @@ CREATE TABLE item (
 CREATE TABLE product (
 	product_id INT AUTO_INCREMENT PRIMARY KEY,
 	name varchar(45),
+	image_url varchar(255),
 	item_id_fk INT,
 	service_id_fk INT,
 	FOREIGN KEY (item_id_fk) REFERENCES item(item_id) ON DELETE CASCADE,
