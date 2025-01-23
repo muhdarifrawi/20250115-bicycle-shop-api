@@ -87,5 +87,5 @@ INSERT INTO item(name, cost, brand_id_fk, item_type_id_fk) VALUES
 ("TREK FULL STACHE 29 MOUNTAIN BIKE FRAME 2021", 1508, 7, 24);
 
 INSERT INTO product (name, item_id_fk, service_id_fk) values 
-("Fork Replacement - Cannondale", 2, 3),
-("Bike Inspection - Any", null, 7);
+("Fork Replacement - Cannondale", "https://placehold.co/300x200", 2, 3),
+("Bike Inspection - Any", "https://placehold.co/300x200", null, 7);
