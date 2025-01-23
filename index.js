@@ -2,8 +2,10 @@ const express = require("express");
 
 require("dotenv").config();
 
+var cors = require('cors')
 let app = express();
 
+app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 
 const { createConnection } = require('mysql2/promise');
