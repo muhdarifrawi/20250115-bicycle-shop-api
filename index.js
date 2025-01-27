@@ -1,4 +1,5 @@
 const express = require("express");
+bodyParser = require('body-parser');
 
 require("dotenv").config();
 
@@ -6,6 +7,8 @@ var cors = require('cors')
 let app = express();
 
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: false }));
 
 const { createConnection } = require('mysql2/promise');
@@ -53,6 +56,121 @@ async function main() {
             });
         }
     });
+
+    app.get("/products/add", async (req, res) => {
+        try {
+            let [item] = await connection.execute(`SELECT * FROM item;`);
+            let [service] = await connection.execute(`SELECT * FROM service;`);
+            res.status(200).json({
+                item,
+                service
+            });
+        }
+        catch (error) {
+            res.status(500).json({
+                message: "Internal Server Error"
+            });
+        }
+    });
+
+    app.post("/products/add", async (req, res) => {
+        try {
+            let {
+                productNameInput,
+                productImageInput,
+                itemId,
+                serviceId
+            } = req.body;
+
+            let query = `INSERT INTO product (
+                        name, image_url, item_id_fk, service_id_fk)
+                        VALUES (?,?,?,?);`;
+            let bindings = [
+                productNameInput,
+                productImageInput,
+                itemId,
+                serviceId
+            ];
+
+            await connection.execute(query, bindings);
+            res.status(200).json({
+                message: "service added"
+            });
+        }
+        catch (error) {
+            console.log(error);
+            res.status(500).json({
+                message: "Internal Server Error", 
+            });
+        }
+    });
+
+    app.get("/products/edit/:id", async (req, res) => {
+        try {
+            let id = req.params.id
+            let [product] = await connection.execute(`SELECT * FROM product WHERE product_id = ?`, id)
+            product = product[0];
+            let [item] = await connection.execute(`SELECT * FROM item;`);
+            let [service] = await connection.execute(`SELECT * FROM service;`);
+            res.status(200).json({
+                product,
+                item,
+                service
+            });
+        }
+        catch (error) {
+            res.status(500).json({
+                message: "Internal Server Error"
+            });
+        }
+    });
+
+    app.post("/products/edit/:id", async (req, res) => {
+        try {
+            let id = req.params.id;
+            let {
+                productNameInput,
+                productImageInput,
+                itemId,
+                serviceId
+            } = req.body;
+
+            let query = `UPDATE product SET 
+                    name=?, image_url=?, item_id_fk=?, service_id_fk=?
+                    WHERE product_id= ?;`;
+            let bindings = [
+                productNameInput,
+                productImageInput,
+                itemId,
+                serviceId,
+                id
+            ];
+
+            await connection.execute(query, bindings);
+
+            res.status(200).json({
+                message: "service edited"
+            });
+        }
+        catch (error) {
+            res.status(500).json({
+                message: "Internal Server Error"
+            });
+        }
+    });
+
+    app.post("/products/delete/:id", async function (req, res) {
+        try {
+            let id = req.params.id;
+            await connection.execute(`DELETE FROM product WHERE product_id = ?`, id);
+            res.sendStatus(200)
+        }
+        catch (error) {
+            res.status(500).json({
+                message: "Internal Server Error"
+            });
+        }
+    })
 
     app.get("/services", async (req, res) => {
         try {
@@ -201,9 +319,7 @@ async function main() {
         try {
             let id = req.params.id;
             await connection.execute(`DELETE FROM service WHERE service_id = ?`, id);
-            res.send(200).json({
-                message: "service deleted"
-            });
+            res.sendStatus(200)
         }
         catch (error) {
             res.status(500).json({
