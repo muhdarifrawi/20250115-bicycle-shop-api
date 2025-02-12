@@ -1,4 +1,5 @@
 const express = require("express");
+const bodyParser  = require('body-parser');
 
 require("dotenv").config();
 
@@ -7,6 +8,8 @@ let app = express();
 
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 const { createConnection } = require('mysql2/promise');
 
@@ -88,6 +91,7 @@ async function main() {
     });
 
     app.post("/services/add", async (req, res) => {
+        console.log(req.body);
         try {
             let {
                 serviceNameInput,
@@ -199,11 +203,13 @@ async function main() {
 
     app.post("/services/delete/:id", async function (req, res) {
         try {
+            console.log(req.params.id);
             let id = req.params.id;
             await connection.execute(`DELETE FROM service WHERE service_id = ?`, id);
-            res.send(200).json({
-                message: "service deleted"
-            });
+            // res.send(200).json({
+            //     message: "service deleted"
+            // });
+            res.sendStatus(200);
         }
         catch (error) {
             res.status(500).json({
