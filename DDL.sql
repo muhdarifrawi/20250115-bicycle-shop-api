@@ -12,7 +12,9 @@ CREATE TABLE staff (
 	staff_id INT AUTO_INCREMENT PRIMARY KEY,
 	name varchar(45),
 	date_joined DATE,
-	title varchar(45)
+	title varchar(45),
+	username varchar(45),
+	password varchar(45)
 );
 CREATE TABLE brand (
 	brand_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -25,7 +27,9 @@ CREATE TABLE itemType (
 CREATE TABLE user (
 	user_id	INT AUTO_INCREMENT PRIMARY KEY,
 	name varchar(45),
-	birthdate DATE
+	birthdate DATE,
+	username varchar(45),
+	password varchar(45)
 );
 
 -- create shared tables

@@ -1,5 +1,5 @@
 const express = require("express");
-const bodyParser  = require('body-parser');
+const bodyParser  = require("body-parser");
 
 require("dotenv").config();
 
@@ -14,6 +14,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const { createConnection } = require('mysql2/promise');
+const { authCheck, generateAccessToken } = require("./auth");
+const { verifyUser } = require("./user");
 
 let connection;
 
@@ -29,7 +31,14 @@ async function main() {
         queueLimit: 0,
     })
 
-    app.get("/", (req, res) => {
+    app.post("/login", verifyUser, (req, res) => {
+        // const user = verifyUser(req,res);
+        // res.json({user});
+        // const token = generateAccessToken("tester1");
+        // res.json({token});
+    })
+
+    app.get("/", authCheck , (req, res) => {
         try {
             res.status(200).json({
                 message: "API is running"
