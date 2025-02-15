@@ -12,29 +12,52 @@ async function verifyUser(req, res, next) {
         queueLimit: 0,
     })
 
-    let {username} = req.body;
-    
-    let [user] = await connection.execute(`SELECT * FROM user WHERE username=?;`, [username]);
-    
-    if(user.length != 0){
-        res.status(200).json({
-            user
-        });
+    let { username, password } = req.body;
+    console.log(username, password);
+    try {
+        let [user] = await connection.execute(`SELECT * FROM user WHERE username=?;`, [username]);
+        let [staff] = await connection.execute(`SELECT * FROM staff WHERE username=?;`, [username]);
+        // console.log(user[0].username, user[0].password)
+        // console.log(user[0].password === password);
+
+        if (user.length == 0 && staff.length == 0) {
+            return res.status(200).json({
+                message: "Username or Password is incorrect [1]"
+            });
+        }
+
+        else if (user.length != 0)  {
+            if (user[0].password !== password) {
+                return res.status(401).json({
+                    message: "Username or Password is incorrect [2]"
+                });
+            }
+            else {
+                return res.status(200).json({
+                    user
+                });
+            }
+        }
+
+        else if (staff.length != 0) {
+            if (staff[0].password !== password) {
+                return res.status(401).json({
+                    message: "Username or Password is incorrect [3]"
+                });
+            }
+            else {
+                return res.status(200).json({
+                    staff
+                });
+            }
+        }
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 
-    let [staff] = await connection.execute(`SELECT * FROM staff WHERE username=?;`, [username]);
-    
-    if(staff.length != 0){
-        res.status(200).json({
-            staff
-        });
-    }
 
-    if(user.length == 0 && staff.length == 0){
-        res.status(200).json({
-            message: "Username or Password is incorrect"
-        });
-    }
 }
 
 module.exports = { verifyUser };
