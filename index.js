@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const { createConnection } = require('mysql2/promise');
-const { authCheck, generateAccessToken } = require("./auth");
+const { authCheck, generateAccessToken, adminCheck } = require("./auth");
 const { loginUser, logoutUser } = require("./user");
 
 let connection;
@@ -35,8 +35,9 @@ async function main() {
 
     app.post("/logout", logoutUser);
 
-    app.get("/", authCheck , (req, res) => {
+    app.get("/", (req, res) => {
         try {
+            console.log(req.data);
             res.status(200).json({
                 message: "API is running"
             });
@@ -65,7 +66,7 @@ async function main() {
         }
     });
 
-    app.get("/products/add", async (req, res) => {
+    app.get("/products/add", authCheck, adminCheck, async (req, res) => {
         try {
             let [item] = await connection.execute(`SELECT * FROM item;`);
             let [service] = await connection.execute(`SELECT * FROM service;`);
@@ -81,7 +82,7 @@ async function main() {
         }
     });
 
-    app.post("/products/add", async (req, res) => {
+    app.post("/products/add", authCheck, adminCheck, async (req, res) => {
         try {
             let {
                 productNameInput,
@@ -113,7 +114,7 @@ async function main() {
         }
     });
 
-    app.get("/products/edit/:id", async (req, res) => {
+    app.get("/products/edit/:id", authCheck, adminCheck, async (req, res) => {
         try {
             let id = req.params.id
             let [product] = await connection.execute(`SELECT * FROM product WHERE product_id = ?`, id)
@@ -133,7 +134,7 @@ async function main() {
         }
     });
 
-    app.post("/products/edit/:id", async (req, res) => {
+    app.post("/products/edit/:id", authCheck, adminCheck, async (req, res) => {
         try {
             let id = req.params.id;
             let {
@@ -167,7 +168,7 @@ async function main() {
         }
     });
 
-    app.post("/products/delete/:id", async function (req, res) {
+    app.post("/products/delete/:id", authCheck, adminCheck, async function (req, res) {
         try {
             let id = req.params.id;
             await connection.execute(`DELETE FROM product WHERE product_id = ?`, id);
@@ -180,7 +181,7 @@ async function main() {
         }
     })
 
-    app.get("/services", async (req, res) => {
+    app.get("/services", authCheck, adminCheck, async (req, res) => {
         try {
             let [services] = await connection.execute({
                 sql: `SELECT * FROM service
@@ -197,7 +198,7 @@ async function main() {
         }
     });
 
-    app.get("/services/add", async (req, res) => {
+    app.get("/services/add", authCheck, adminCheck, async (req, res) => {
         try {
             let [serviceType] = await connection.execute(`SELECT * FROM serviceType;`);
             let [staff] = await connection.execute(`SELECT * FROM staff;`);
@@ -213,7 +214,7 @@ async function main() {
         }
     });
 
-    app.post("/services/add", async (req, res) => {
+    app.post("/services/add", authCheck, adminCheck, async (req, res) => {
         console.log(req.body);
         try {
             let {
@@ -245,7 +246,7 @@ async function main() {
         }
     });
 
-    app.get("/services/edit/:id", async (req, res) => {
+    app.get("/services/edit/:id", authCheck, adminCheck, async (req, res) => {
         try {
             let id = req.params.id
             let [service] = await connection.execute(`SELECT * FROM service WHERE service_id = ?`, id)
@@ -265,7 +266,7 @@ async function main() {
         }
     });
 
-    app.post("/services/edit/:id", async (req, res) => {
+    app.post("/services/edit/:id", authCheck, adminCheck, async (req, res) => {
         try {
             let id = req.params.id;
             let {
@@ -299,7 +300,7 @@ async function main() {
         }
     });
 
-    app.get("/services/delete/:id", async function (req, res) {
+    app.get("/services/delete/:id", authCheck, adminCheck, async function (req, res) {
         try {
             let id = req.params.id
             let [service] = await connection.execute(`SELECT * FROM service WHERE service_id = ?`, id)
@@ -324,7 +325,7 @@ async function main() {
         }
     })
 
-    app.post("/services/delete/:id", async function (req, res) {
+    app.post("/services/delete/:id", authCheck, adminCheck, async function (req, res) {
         try {
             console.log(req.params.id);
             let id = req.params.id;
@@ -339,7 +340,7 @@ async function main() {
         }
     })
 
-    app.post("/services", async function (req, res) {
+    app.post("/services", authCheck, adminCheck, async function (req, res) {
         try {
             let searchInput = [req.body.searchInput];
             console.log(searchInput);
@@ -375,7 +376,7 @@ async function main() {
         }
     })
 
-    app.get("/items", async (req, res) => {
+    app.get("/items", authCheck, adminCheck, async (req, res) => {
         try {
             let [items] = await connection.execute({
                 sql: `SELECT * FROM item
@@ -394,7 +395,7 @@ async function main() {
         }
     });
 
-    app.get("/items/add", async (req, res) => {
+    app.get("/items/add", authCheck, adminCheck, async (req, res) => {
         try {
             let [itemType] = await connection.execute(`SELECT * FROM itemType;`);
             let [brand] = await connection.execute(`SELECT * FROM brand;`);
@@ -410,7 +411,7 @@ async function main() {
         }
     });
 
-    app.post("/items/add", async (req, res) => {
+    app.post("/items/add", authCheck, adminCheck, async (req, res) => {
         try {
             let {
                 itemNameInput,
@@ -442,7 +443,7 @@ async function main() {
         }
     });
 
-    app.get("/items/edit/:id", async (req, res) => {
+    app.get("/items/edit/:id", authCheck, adminCheck, async (req, res) => {
         try {
             let id = req.params.id;
             let [item] = await connection.execute('SELECT * from item WHERE item_id = ?', id);
@@ -462,7 +463,7 @@ async function main() {
         }
     });
 
-    app.post("/items/edit/:id", async (req, res) => {
+    app.post("/items/edit/:id", authCheck, adminCheck, async (req, res) => {
         try {
             let id = req.params.id;
             let {
@@ -495,7 +496,7 @@ async function main() {
         }
     });
 
-    app.get("/items/delete/:id", async function (req, res) {
+    app.get("/items/delete/:id", authCheck, adminCheck, async function (req, res) {
         try {
             let id = req.params.id;
             let [item] = await connection.execute('SELECT * from item WHERE item_id = ?', id);
@@ -520,7 +521,7 @@ async function main() {
         }
     })
 
-    app.post("/items/delete/:id", async function (req, res) {
+    app.post("/items/delete/:id", authCheck, adminCheck, async function (req, res) {
         try {
             let id = req.params.id;
             await connection.execute(`DELETE FROM item WHERE item_id = ?`, id);
@@ -535,7 +536,7 @@ async function main() {
         }
     })
 
-    app.get("/cart", async function (req, res) {
+    app.get("/cart", authCheck, async function (req, res) {
         try {
             let [cart] = await connection.execute({
                 sql: `SELECT * FROM cartItems
@@ -554,7 +555,7 @@ async function main() {
         }
     })
 
-    app.get("/cart/add/:id", async function (req, res) {
+    app.get("/cart/add/:id", authCheck, async function (req, res) {
         try {
             let id = req.params.id
             let [product] = await connection.execute(`SELECT * FROM product WHERE product_id = ?`, id);
@@ -572,7 +573,7 @@ async function main() {
         }
     })
 
-    app.post("/cart/add/:id", async function (req, res) {
+    app.post("/cart/add/:id", authCheck, async function (req, res) {
         try {
             let {
                 name,

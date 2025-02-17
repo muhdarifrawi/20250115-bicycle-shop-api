@@ -24,4 +24,24 @@ function authCheck(req, res, next) {
     })
 }
 
-module.exports = { generateAccessToken, authCheck };
+function adminCheck(req, res, next) {
+    try {
+        const body = req.data;
+        console.log("adminCheck: ", body.data)
+        console.log("data role: ", body.data.role)
+        if(body.data.role !== "staff"){
+            return res.status(401).json({
+                status: "failed",
+                message: "You are not authorized to view this page."
+            })
+        }
+        next();
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
+}
+
+module.exports = { generateAccessToken, authCheck, adminCheck };
