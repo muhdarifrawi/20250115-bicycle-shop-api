@@ -1,6 +1,7 @@
 const { createConnection } = require('mysql2/promise');
+const { generateAccessToken } = require('./auth');
 
-async function verifyUser(req, res, next) {
+async function loginUser(req, res, next) {
     connection = await createConnection({
         "host": process.env.DB_HOST,
         "user": process.env.DB_USER,
@@ -33,8 +34,19 @@ async function verifyUser(req, res, next) {
                 });
             }
             else {
+                let userData = {
+                    userId:user[0].user_id,
+                    name:user[0].name,
+                    username:user[0].username,
+                    birthdate:user[0].birthdate,
+                    role:"user"
+                }
+
+                let accessToken = generateAccessToken(userData);
+                res.cookie("sessionId", accessToken);
+
                 return res.status(200).json({
-                    user
+                    userData
                 });
             }
         }
@@ -46,8 +58,20 @@ async function verifyUser(req, res, next) {
                 });
             }
             else {
+                let staffData = {
+                    staffId:staff[0].user_id,
+                    name:staff[0].name,
+                    username:staff[0].username,
+                    joinDate:staff[0].date_joined,
+                    title:staff[0].title,
+                    role:"staff"
+                }
+
+                let accessToken = generateAccessToken(staffData);
+                res.cookie("sessionId", accessToken);
+
                 return res.status(200).json({
-                    staff
+                    staffData
                 });
             }
         }
@@ -56,8 +80,19 @@ async function verifyUser(req, res, next) {
         console.log(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
-
-
 }
 
-module.exports = { verifyUser };
+async function logoutUser(req, res, next) {
+    try {
+        res.clearCookie("sessionId");
+        res.status(200).json({
+            message: "You are logged out."
+        })
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+module.exports = { loginUser, logoutUser };

@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const { createConnection } = require('mysql2/promise');
 const { authCheck, generateAccessToken } = require("./auth");
-const { verifyUser } = require("./user");
+const { loginUser, logoutUser } = require("./user");
 
 let connection;
 
@@ -31,12 +31,9 @@ async function main() {
         queueLimit: 0,
     })
 
-    app.post("/login", verifyUser, (req, res) => {
-        // const user = verifyUser(req,res);
-        // res.json({user});
-        // const token = generateAccessToken("tester1");
-        // res.json({token});
-    })
+    app.post("/login", loginUser);
+
+    app.post("/logout", logoutUser);
 
     app.get("/", authCheck , (req, res) => {
         try {
